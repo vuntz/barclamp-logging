@@ -18,14 +18,8 @@ return if node[:platform] == "windows"
 
 package "rsyslog"
 
-env_filter = " AND environment:#{node[:logging][:config][:environment]}"
-servers = search(:node, "roles:logging\\-server#{env_filter}")
-
-if servers.nil?
-  servers = []
-else
-  servers = servers.map { |x| Chef::Recipe::Barclamp::Inventory.get_network_by_type(x, "admin").address }
-end
+logging_settings = CrowbarConfig.fetch("core", "logging")
+servers = logging_settings.fetch("internal_servers", [])
 
 # Disable syslogd in favor of rsyslog on redhat.
 case node[:platform]
