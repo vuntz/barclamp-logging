@@ -17,6 +17,7 @@
 #
 
 tmpdir=/opt/dell/crowbar_framework/tmp/log-export
+targetdir=/opt/dell/crowbar_framework/public/export
 
 if [[ -f /etc/crowbar.install.key ]]; then
     export CROWBAR_KEY=$(cat /etc/crowbar.install.key)
@@ -25,7 +26,6 @@ fi
 mkdir -p "${tmpdir}"
 
 tarname="${1-$(date '+%Y%m%d-%H%M%S')}"
-targetdir="/opt/dell/crowbar_framework/public/export"
 sort_by_last() {
     local src=() keys=() sorted=() line=""
     while read line; do
