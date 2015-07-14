@@ -16,8 +16,21 @@
 # limitations under the License.
 #
 
-tmpdir=/opt/dell/crowbar_framework/tmp/log-export
-targetdir=/opt/dell/crowbar_framework/public/export
+rails_dir=
+for dir in /var/lib/crowbar /opt/dell/crowbar_framework; do
+    if [ -e "${dir}/config/crowbar.env" ]; then
+        rails_dir="${dir}"
+        break
+    fi
+done
+
+if [ -z "${rails_dir}" ]; then
+    echo "Cannot find directory of Crowbar Rails application."
+    exit 1
+fi
+
+tmpdir="${rails_dir}/tmp/log-export"
+targetdir="${rails_dir}/public/export"
 
 if [[ -f /etc/crowbar.install.key ]]; then
     export CROWBAR_KEY=$(cat /etc/crowbar.install.key)
@@ -50,7 +63,7 @@ sort_by_last() {
     sshopts=(-q -o 'StrictHostKeyChecking no' 
 	-o 'UserKnownHostsFile /dev/null')
     logs=(/var/log /etc)
-    logs+=(/var/chef/cache /var/cache/chef /opt/dell/crowbar_framework/db)
+    logs+=(/var/chef/cache /var/cache/chef "${rails_dir}/db")
     curlargs=(-o /dev/null -D - --connect-timeout 30 --max-time 120)
     [[ $CROWBAR_KEY ]] && curlargs+=(--digest -u "$CROWBAR_KEY")
     for to_get in nodes proposals roles; do
