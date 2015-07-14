@@ -16,10 +16,14 @@
 # limitations under the License.
 #
 
+tmpdir=/opt/dell/crowbar_framework/tmp/log-export
+
 if [[ -f /etc/crowbar.install.key ]]; then
     export CROWBAR_KEY=$(cat /etc/crowbar.install.key)
 fi
-mkdir -p /tmp/crowbar-logs
+
+mkdir -p "${tmpdir}"
+
 tarname="${1-$(date '+%Y%m%d-%H%M%S')}"
 targetdir="/opt/dell/crowbar_framework/public/export"
 sort_by_last() {
@@ -39,7 +43,7 @@ sort_by_last() {
 	
     
 (   flock -s 200
-    logdir=$(mktemp -d "/tmp/crowbar-logs/$tarname-XXXXX")
+    logdir=$(mktemp -d "${tmpdir}/$tarname-XXXXX")
     mkdir -p "$logdir"
     mkdir -p "$targetdir"
     cd "$logdir"
@@ -63,7 +67,7 @@ sort_by_last() {
     find . -depth -print | \
 	sort_by_last / | \
 	cpio -o -H ustar | \
-	bzip2 -9 > "/tmp/${tarname}"
-	  mv "/tmp/${tarname}" "$targetdir/${tarname}"
+	bzip2 -9 > "${tmpdir}/${tarname}"
+	  mv "${tmpdir}/${tarname}" "$targetdir/${tarname}"
     rm -rf "$logdir"
-) 200>/tmp/crowbar-logs/.lock
+) 200>${tmpdir}/.lock
